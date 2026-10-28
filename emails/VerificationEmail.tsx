@@ -7,7 +7,6 @@ import {
 	Row,
 	Section,
 	Text,
-	Button,
 } from "react-email";
 
 interface VerificationEmailProps {
