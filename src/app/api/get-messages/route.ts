@@ -5,13 +5,10 @@ import UserModel from "@/model/User";
 import mongoose from "mongoose";
 const { auth } = NextAuth(authOptions);
 
-// const session = await auth();
-// const userId = session?.user?._id;
-
-export async function GET(request: Request) {
+export async function GET() {
     const session = await auth();
     await dbConnect();
-    
+
     if(!session || !session.user) {
         return Response.json(
             {

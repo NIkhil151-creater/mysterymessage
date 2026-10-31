@@ -10,36 +10,40 @@ export const authOptions: NextAuthConfig = {
       id: 'credentials',
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'text' },
+        identifier: { label: 'Email or username', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials: any): Promise<any> {
-        await dbConnect();
-        try {
-          const user = await UserModel.findOne({
-            $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
-            ],
-          });
-          if (!user) {
-            throw new Error('No user found with this email');
-          }
-          if (!user.isVerified) {
-            throw new Error('Please verify your account before logging in');
-          }
-          const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-          if (isPasswordCorrect) {
-            return user;
-          } else {
-            throw new Error('Incorrect password');
-          }
-        } catch (err: any) {
-          throw new Error(err);
+      async authorize(credentials) {
+        const identifier = credentials.identifier;
+        const password = credentials.password;
+
+        if (typeof identifier !== 'string' || typeof password !== 'string') {
+          return null;
         }
+
+        await dbConnect();
+
+        const user = await UserModel.findOne({
+          $or: [{ email: identifier }, { username: identifier }],
+        });
+
+        if (!user || !user.isVerified) {
+          return null;
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+          return null;
+        }
+
+        return {
+          id: user._id.toString(),
+          _id: user._id.toString(),
+          email: user.email,
+          username: user.username,
+          isVerified: user.isVerified,
+          isAcceptingMessages: user.isAcceptingMessages,
+        };
       },
     }),
   ],

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Instrument_Sans, Noto_Serif } from "next/font/google";
 import type { ReactNode } from "react";
-import "./globals.css";
+import "@/app/globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast"

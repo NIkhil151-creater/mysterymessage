@@ -1,8 +1,13 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import * as z from "zod";
+
+import { useState } from 'react';
+import type * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,56 +16,56 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import Link from 'next/link';
-import { useDebounceValue } from 'usehooks-ts';
 import { toast } from "@/components/ui/toast";
-import { useRouter } from 'next/navigation';
-import axios, { AxiosError } from "axios";
-import { ApiResponse } from '@/types/ApiResponse';
-import { Loader2 } from 'lucide-react';
 import { signInSchema } from '@/schemas/signInSchema';
-import { signIn } from 'next-auth/react';
 
 const SignUpPage = () => {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const router = useRouter();
-	type formValues = z.infer<typeof signInSchema>
+	type formValues = z.infer<typeof signInSchema>;
 
-	//zod implementaition
 	const form = useForm<formValues>({
 		resolver: zodResolver(signInSchema),
 		defaultValues: {
 			identifier: "",
 			password: "",
-		}
+		},
 	});
 
 	const onSubmit = async (data: formValues) => {
-		const result = await signIn('credentials', {
-			redirect: false,
-			identifier: data.identifier,
-			password: data.password
-		})
-		if (result?.error) {
-			toast.add({
-				title : "Login Failed",
-				description : "Incorrect username or password",
-			})
-		}
+		setIsSubmitting(true);
 
-		if (result.url) {
-			router.replace("/dashboard");
+		try {
+			const result = await signIn('credentials', {
+				redirect: false,
+				identifier: data.identifier,
+				password: data.password,
+			});
+
+			if (result?.error) {
+				toast.add({
+					title: "Login Failed",
+					description: "Incorrect username or password",
+				});
+				return;
+			}
+
+			if (result?.url) {
+				router.replace("/dashboard");
+			}
+		} finally {
+			setIsSubmitting(false);
 		}
-	}
+	};
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background text-foreground">
 			<div className="w-full max-w-md space-y-8 rounded-lg bg-card p-8 text-card-foreground shadow-md">
 				<div className={`text-center`}>
-					<h1 className={`text-4xl font-extrabold tracking-tight lg:text-5xl mb-6`} >
+					<h1 className={`text-4xl font-extrabold tracking-tight lg:text-5xl mb-6`}>
 						Join Mystery Message
 					</h1>
-					<p className={`mb-4`} >
+					<p className={`mb-4`}>
 						Sign in to start your anonymous adventure.
 					</p>
 				</div>
@@ -75,7 +80,7 @@ const SignUpPage = () => {
 									<Input
 										{...field}
 										id="email"
-										type='email'
+										type="email"
 										aria-invalid={fieldState.invalid}
 										autoComplete="email"
 									/>
@@ -94,7 +99,7 @@ const SignUpPage = () => {
 									<Input
 										{...field}
 										id="password"
-										type='password'
+										type="password"
 										aria-invalid={fieldState.invalid}
 										autoComplete="password"
 									/>
@@ -108,11 +113,11 @@ const SignUpPage = () => {
 							<>
 								<Loader2 className={`mr-2 h-4 w-4 animate-spin`} /> Please Wait
 							</>
-						) : ("SignUp")}
+						) : "Sign In"}
 					</Button>
 				</form>
-				<div className={`text-center mt-4`} >
-					<p className={``} >
+				<div className={`text-center mt-4`}>
+					<p className={``}>
 						Already a member?{' '}
 						<Link href={"/sign-in"} className={`text-blue-600 hover:text-blue-800`}>
 							Sign In
@@ -121,7 +126,7 @@ const SignUpPage = () => {
 				</div>
 			</div>
 		</div>
-	)
-}
+	);
+};
 
-export default SignUpPage
+export default SignUpPage;

@@ -1,30 +1,38 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import dbConnect from '@/lib/dbConnect';
+import UserModel from '@/model/User';
 
-// This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {
-
-	const token = await getToken({ req: request });
+	const token = await getToken({
+		req: request,
+		secret: process.env.NEXTAUTH_SECRET,
+	});
 	const url = request.nextUrl;
+	let isAuthenticated = false;
 
-	if (token &&
+	if (token?._id) {
+		await dbConnect();
+		isAuthenticated = Boolean(await UserModel.exists({ _id: token._id }));
+	}
+
+	if (isAuthenticated &&
 		(
+			url.pathname === "/" ||
 			url.pathname.startsWith("/sign-in") ||
 			url.pathname.startsWith("/sign-up") ||
-			url.pathname.startsWith("/verify") ||
-			url.pathname.startsWith("/")
+			url.pathname.startsWith("/verify")
 		)
 	) {
 		return NextResponse.redirect(new URL('/dashboard', request.url));
 	}
 
-	if(!token && url.pathname.startsWith("/dashboard")) {
-		return NextResponse.redirect(new URL("sign-in", request.url));
+	if(!isAuthenticated && url.pathname.startsWith("/dashboard")) {
+		return NextResponse.redirect(new URL("/sign-in", request.url));
 	}
 
 	return NextResponse.next();
-	// return NextResponse.redirect(new URL('/home', request.url)) //? For some testing purposes
-};
+	};
 
 export const config = {
 	matcher: [
