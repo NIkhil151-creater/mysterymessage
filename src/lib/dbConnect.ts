@@ -1,14 +1,29 @@
 import mongoose from "mongoose";
 
-type ConnectionObject = {
-    isConnected?: number;
+type MongooseCache = {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
 };
 
-const connection: ConnectionObject = {};
+declare global {
+    var mongooseCache: MongooseCache | undefined;
+}
 
-async function dbConnect(): Promise<void> {
-    if (connection.isConnected) {
-        return;
+const cache = global.mongooseCache ?? {
+    conn: null,
+    promise: null,
+};
+
+global.mongooseCache = cache;
+
+async function dbConnect(): Promise<typeof mongoose> {
+    if (cache.conn && mongoose.connection.readyState === 1) {
+        return cache.conn;
+    }
+
+    if (cache.conn && mongoose.connection.readyState === 0) {
+        cache.conn = null;
+        cache.promise = null;
     }
 
     const mongoUri = process.env.MONGODB_URI;
@@ -17,14 +32,18 @@ async function dbConnect(): Promise<void> {
         throw new Error("MONGODB_URI is not defined in the environment variables.");
     }
 
-    try {
-        const db = await mongoose.connect(mongoUri);
-        connection.isConnected = db.connections[0].readyState;
-        console.log("DB Connected Successfully");
-    } catch (error) {
-        console.log(`Database connection failed: ${error}`);
-        throw error;
+    if (!cache.promise) {
+        cache.promise = mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: 10000,
+        }).catch((error: unknown) => {
+            cache.promise = null;
+            throw error;
+        });
     }
+
+    cache.conn = await cache.promise;
+    console.log("DB Connected Successfully");
+    return cache.conn;
 }
 
 export default dbConnect;

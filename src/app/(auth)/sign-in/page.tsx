@@ -118,9 +118,9 @@ const SignUpPage = () => {
 				</form>
 				<div className={`text-center mt-4`}>
 					<p className={``}>
-						Already a member?{' '}
-						<Link href={"/sign-in"} className={`text-blue-600 hover:text-blue-800`}>
-							Sign In
+						Don't have an account?{' '}
+						<Link href={"/sign-up"} className={`text-blue-600 hover:text-blue-800`}>
+							Sign Up
 						</Link>
 					</p>
 				</div>

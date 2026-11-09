@@ -9,20 +9,8 @@ const UsernameQuerySchema = z.object({
 });
 
 export async function GET(request: Request) {
-	//! Below code is not working
-	//todo : use this in all other routes
-	// if (request.method !== "GET") {
-	// 	return Response.json(
-	// 		{
-	// 			success : false,
-	// 			message : "Method not allowed."
-	// 		}, {status : 405}
-	// 	)
-	// }
-	
-	await dbConnect();
-
 	try {
+		await dbConnect();
 		const { searchParams } = new URL(request.url);
 		const queryParam = {
 			username: searchParams.get("username")
@@ -64,8 +52,8 @@ export async function GET(request: Request) {
 		return Response.json(
 			{
 				success: false,
-				message: "Error checking username"
-			}, { status: 500 }
+				message: "Could not check username availability. Check the database connection and try again."
+			}, { status: 503 }
 		)
 	}
 }
