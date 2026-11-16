@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
-import { Poppins, Instrument_Sans, Noto_Serif } from "next/font/google";
+import { Poppins } from "next/font/google";
 import type { ReactNode } from "react";
 import "@/app/globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 
-const notoSerifHeading = Noto_Serif({ subsets: ['latin'], variable: '--font-heading' });
-
-const instrumentSans = Instrument_Sans({ subsets: ['latin'], variable: '--font-sans' });
-
 const poppins = Poppins({
 	weight: ["400", "500", "600", "700"],
 	subsets: ["latin"],
+	variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
 	return (
-		<html lang="en" className={cn("dark", "h-full", "antialiased", poppins.className, "font-sans", instrumentSans.variable, notoSerifHeading.variable)}>
+		<html lang="en" className={cn("dark", "h-full", "antialiased", poppins.className, "font-sans", poppins.variable)}>
 			<body className="min-h-full flex flex-col">
 				<Navbar />
 				{children}

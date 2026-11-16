@@ -59,8 +59,17 @@ const SignUpPage = () => {
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-			<div className="w-full max-w-md space-y-8 rounded-lg bg-card p-8 text-card-foreground shadow-md">
+		<div
+			className="flex min-h-screen items-center justify-center bg-background text-foreground"
+			style={{ backgroundColor: "oklch(0.148 0.004 228.8)" }}
+		>
+			<div
+				className="w-full max-w-md space-y-8 rounded-lg bg-card p-8 text-card-foreground shadow-md"
+				style={{
+					backgroundColor: "oklch(0.218 0.008 223.9)",
+					color: "oklch(0.987 0.002 197.1)",
+				}}
+			>
 				<div className={`text-center`}>
 					<h1 className={`text-4xl font-extrabold tracking-tight lg:text-5xl mb-6`}>
 						Join Mystery Message
